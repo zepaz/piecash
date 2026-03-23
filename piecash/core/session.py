@@ -126,6 +126,34 @@ version_supported = {
         "transactions": 4,
         "vendors": 1,
     },
+    # GnuCash 5.x (confirmed against GnuCash 5.11 MySQL schema)
+    # Key changes vs 4.1: Gnucash version bumped to 3000007, slots bumped to 4
+    "5.x": {
+        "Gnucash": 3000007,
+        "Gnucash-Resave": 19920,
+        "accounts": 1,
+        "billterms": 2,
+        "books": 1,
+        "budget_amounts": 1,
+        "budgets": 1,
+        "commodities": 1,
+        "customers": 2,
+        "employees": 2,
+        "entries": 4,
+        "invoices": 4,
+        "jobs": 1,
+        "lots": 2,
+        "orders": 1,
+        "prices": 3,
+        "recurrences": 2,
+        "schedxactions": 1,
+        "slots": 4,
+        "splits": 5,
+        "taxtable_entries": 3,
+        "taxtables": 2,
+        "transactions": 4,
+        "vendors": 1,
+    },
 }
 
 # this is not a declarative as it is used before binding the session to an engine.
@@ -161,15 +189,15 @@ class Version(DeclarativeBase):
 
 
 def build_uri(
-    sqlite_file=None,
-    uri_conn=None,
-    db_type=None,
-    db_user=None,
-    db_password=None,
-    db_name=None,
-    db_host=None,
-    db_port=None,
-    check_same_thread=True,
+        sqlite_file=None,
+        uri_conn=None,
+        db_type=None,
+        db_user=None,
+        db_password=None,
+        db_name=None,
+        db_host=None,
+        db_port=None,
+        check_same_thread=True,
 ):
     """Create the connection string in function of some choices.
 
@@ -233,20 +261,20 @@ def build_uri(
 
 
 def create_book(
-    sqlite_file=None,
-    uri_conn=None,
-    currency="locale",
-    overwrite=False,
-    keep_foreign_keys=False,
-    db_type=None,
-    db_user=None,
-    db_password=None,
-    db_name=None,
-    db_host=None,
-    db_port=None,
-    check_same_thread=True,
-    pg_template="template0",
-    **kwargs
+        sqlite_file=None,
+        uri_conn=None,
+        currency="locale",
+        overwrite=False,
+        keep_foreign_keys=False,
+        db_type=None,
+        db_user=None,
+        db_password=None,
+        db_name=None,
+        db_host=None,
+        db_port=None,
+        check_same_thread=True,
+        pg_template="template0",
+        **kwargs
 ):
     """Create a new empty GnuCash book. If both sqlite_file and uri_conn are None, then an "in memory" sqlite book is created.
 
@@ -320,7 +348,7 @@ def create_book(
 
     # create all rows in version table
     assert (
-        VERSION_FORMAT in version_supported
+            VERSION_FORMAT in version_supported
     ), "The 'version_format'={} is not supported. " "Choose one of {}".format(
         VERSION_FORMAT, list(version_supported.keys())
     )
@@ -335,7 +363,7 @@ def create_book(
 
     # create commodities and initial accounts
     from .account import Account
-    
+
     if currency == "locale":
         locale.setlocale(locale.LC_ALL, '')
         currency = locale.localeconv()['int_curr_symbol'].strip() or 'EUR'
@@ -353,20 +381,20 @@ def create_book(
 
 
 def open_book(
-    sqlite_file=None,
-    uri_conn=None,
-    readonly=True,
-    open_if_lock=False,
-    do_backup=True,
-    db_type=None,
-    db_user=None,
-    db_password=None,
-    db_name=None,
-    db_host=None,
-    db_port=None,
-    check_same_thread=True,
-    check_exists=True,
-    **kwargs
+        sqlite_file=None,
+        uri_conn=None,
+        readonly=True,
+        open_if_lock=False,
+        do_backup=True,
+        db_type=None,
+        db_user=None,
+        db_password=None,
+        db_name=None,
+        db_host=None,
+        db_port=None,
+        check_same_thread=True,
+        check_exists=True,
+        **kwargs
 ):
     """Open an existing GnuCash book
 
@@ -428,7 +456,7 @@ def open_book(
                 )
             )
 
-        url = uri_conn[len("sqlite:///") :].replace("?check_same_thread=False", "")
+        url = uri_conn[len("sqlite:///"):].replace("?check_same_thread=False", "")
         url_backup = url + ".{:%Y%m%d%H%M%S}.gnucash".format(datetime.datetime.now())
 
         shutil.copyfile(url, url_backup)
@@ -452,8 +480,8 @@ def open_book(
             break
     else:
         raise ValueError("Unsupported table versions")
-    assert version == "3.0" or version == "3.7" or version == "4.1", (
-        "This version of piecash only support books from gnucash (3.0|3.7|4.1) "
+    assert version in ("3.0", "3.7", "4.1", "5.x"), (
+        "This version of piecash only support books from gnucash (3.0|3.7|4.1|5.x) "
         "which is not the case for {}".format(uri_conn)
     )
 
@@ -495,7 +523,7 @@ def adapt_session(session, book, readonly):
         session.execute(
             gnclock.delete(
                 whereclause=(gnclock.c.hostname == socket.gethostname())
-                and (gnclock.c.pid == os.getpid())
+                            and (gnclock.c.pid == os.getpid())
             )
         )
         session.commit()
@@ -528,7 +556,7 @@ def adapt_session(session, book, readonly):
 
     session.__class__.is_saved = property(
         fget=lambda self: not (
-            self._is_modified or self.dirty or self.deleted or self.new
+                self._is_modified or self.dirty or self.deleted or self.new
         ),
         doc="True if nothing has yet been changed (False otherwise)",
     )
